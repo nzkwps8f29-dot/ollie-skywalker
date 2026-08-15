@@ -140,7 +140,7 @@ introSkip.addEventListener("click",finishIntro);
 crawl.addEventListener("animationend",finishIntro);
 
 let W,H,dpr,run=false,score=0,lives=3,last=0,spawn=0;
-let enemies=[],stars=[],sparks=[];
+let enemies=[],stars=[],sparks=[]; let enemyCycle=0;
 let p={down:false,x:0,y:0,startY:0,jumpTriggered:false},hero={x:0,targetX:0,y:0,a:-1.0,ta:-1.0,jumpY:0,jumpV:0,grounded:true};
 
 const worlds={
@@ -169,17 +169,18 @@ function bg(){
 
 function spawnEnemy(){
   const types=['vader','stormtrooper','r2d2','tiefighter','deathstar'];
-  const type=types[Math.floor(Math.random()*types.length)];
-  const rByType={vader:27,stormtrooper:25,r2d2:24,tiefighter:28,deathstar:27};
-  const r=(rByType[type]||25)+(Math.random()*4-2);
+  const type=types[enemyCycle % types.length];
+  enemyCycle++;
+  const rByType={vader:39,stormtrooper:37,r2d2:35,tiefighter:42,deathstar:40};
+  const r=rByType[type];
   enemies.push({
-    x:35+Math.random()*(W-70),
-    y:-45,
+    x:55+Math.random()*(W-110),
+    y:-60,
     r,
     type,
-    vy:105+Math.random()*75+score*.38,
-    vx:(Math.random()-.5)*28,
-    spin:(type==='tiefighter'||type==='deathstar')?(Math.random()*.9-.45):(Math.random()*.35-.175),
+    vy:92+Math.random()*50+score*.26,
+    vx:(Math.random()-.5)*18,
+    spin:(type==='tiefighter'||type==='deathstar')?(Math.random()*.35-.175):0,
     a:0
   });
 }
@@ -316,6 +317,26 @@ function drawEnemy(e){
     x.fillStyle='#8cff9b'; x.beginPath(); x.arc(e.r*.33,-e.r*.32,e.r*.07,0,7); x.fill();
   }
 
+  x.save();
+  x.rotate(-e.a);
+  x.font='800 12px -apple-system,BlinkMacSystemFont,Arial';
+  x.textAlign='center';
+  x.textBaseline='top';
+  x.lineWidth=4;
+  const labelMap={
+    vader:'VADER',
+    stormtrooper:'STORMTROOPER',
+    r2d2:'R2-D2',
+    tiefighter:'TIE FIGHTER',
+    deathstar:'DEATH STAR'
+  };
+  const label=labelMap[e.type]||'ENEMY';
+  x.strokeStyle='rgba(0,0,0,.9)';
+  x.strokeText(label,0,e.r+10);
+  x.fillStyle='#ffffff';
+  x.fillText(label,0,e.r+10);
+  x.restore();
+
   x.restore();
 }
 
@@ -339,7 +360,7 @@ function loop(t){
 }
 
 function start(){
-  score=0;lives=3;spawn=0;enemies=[];sparks=[];hero.jumpY=0;hero.jumpV=0;hero.grounded=true;scoreEl.textContent=0;livesEl.textContent=3;
+  score=0;lives=3;spawn=0;enemyCycle=0;enemies=[];sparks=[];hero.jumpY=0;hero.jumpV=0;hero.grounded=true;scoreEl.textContent=0;livesEl.textContent=3;
   worldLabel.textContent=worldSel.options[worldSel.selectedIndex].text;
   menu.classList.add("hide");run=true;last=performance.now();requestAnimationFrame(loop);
 }
