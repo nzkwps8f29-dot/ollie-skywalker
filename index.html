@@ -90,7 +90,7 @@ button{width:100%;background:#7df9ff;color:#061019}
       <p>But there was no time for cake just yet.</p>
       <p>A squadron of Shadow Drones had stolen the Starlight Crystal, an ancient power source capable of opening a hidden gateway between worlds. If the drones reached the final planet, they could awaken the Dark Beacon and plunge the galaxy into chaos.</p>
       <p>Only one newly qualified hero had the speed, skill and birthday-level bravery to stop them.</p>
-      <p>Ollie must travel across Aurelia, Volcara, Glacien and Noctis, defeat troopers, droids, dark lords and rogue starfighters, recover the crystal fragments and reach the Dark Beacon before it activates.</p>
+      <p>Ollie must travel across Aurelia, Volcara, Glacien and Noctis, defeat Darth Vader, Stormtroopers, R2-D2 units, TIE Fighters and Death Stars, recover the crystal fragments and reach the Dark Beacon before it activates.</p>
       <p>The mission is secret. The danger is real.</p>
       <p>And the galaxy is waiting for… Ollie Skywalker.</p>
     </div>
@@ -168,18 +168,18 @@ function bg(){
 }
 
 function spawnEnemy(){
-  const types=['trooper','droid','darklord','fighter','alien'];
+  const types=['vader','stormtrooper','r2d2','tiefighter','deathstar'];
   const type=types[Math.floor(Math.random()*types.length)];
-  const rByType={trooper:20,droid:18,darklord:22,fighter:24,alien:17};
-  const r=(rByType[type]||18)+(Math.random()*4-2);
+  const rByType={vader:27,stormtrooper:25,r2d2:24,tiefighter:28,deathstar:27};
+  const r=(rByType[type]||25)+(Math.random()*4-2);
   enemies.push({
-    x:25+Math.random()*(W-50),
-    y:-35,
+    x:35+Math.random()*(W-70),
+    y:-45,
     r,
     type,
-    vy:120+Math.random()*90+score*.45,
-    vx:(Math.random()-.5)*35,
-    spin:(type==='fighter'?Math.random()*3-1.5:Math.random()*6-3),
+    vy:105+Math.random()*75+score*.38,
+    vx:(Math.random()-.5)*28,
+    spin:(type==='tiefighter'||type==='deathstar')?(Math.random()*.9-.45):(Math.random()*.35-.175),
     a:0
   });
 }
@@ -237,39 +237,85 @@ function update(dt){
 }
 
 function drawEnemy(e){
-  x.save();x.translate(e.x,e.y);x.rotate(e.a);
-  if(e.type==='trooper'){
-    x.fillStyle='#f4f6fb';x.strokeStyle='#2a3145';x.lineWidth=2;
-    x.beginPath();x.arc(0,-e.r*.2,e.r*.72,0,7);x.fill();x.stroke();
-    x.fillStyle='#111826';x.fillRect(-e.r*.42,-e.r*.42,e.r*.84,e.r*.2);
-    x.fillStyle='#f4f6fb';x.beginPath();x.roundRect(-e.r*.72,e.r*.18,e.r*1.44,e.r*.9,6);x.fill();x.stroke();
-    x.fillStyle='#111826';x.fillRect(-e.r*.35,e.r*.42,e.r*.7,e.r*.16);
-  }else if(e.type==='droid'){
-    x.fillStyle='#d7b37b';x.strokeStyle='#6a4b22';x.lineWidth=2;
-    x.beginPath();x.roundRect(-e.r*.42,-e.r*.95,e.r*.84,e.r*.46,5);x.fill();x.stroke();
-    x.beginPath();x.roundRect(-e.r*.7,-e.r*.38,e.r*1.4,e.r*1.12,8);x.fill();x.stroke();
-    x.strokeStyle='#6a4b22';x.lineWidth=3;
-    x.beginPath();x.moveTo(-e.r*.3,e.r*.74);x.lineTo(-e.r*.5,e.r*1.25);x.moveTo(e.r*.3,e.r*.74);x.lineTo(e.r*.5,e.r*1.25);x.stroke();
-    x.fillStyle='#1fa7ff';x.beginPath();x.arc(-e.r*.18,-e.r*.73,e.r*.07,0,7);x.arc(e.r*.18,-e.r*.73,e.r*.07,0,7);x.fill();
-  }else if(e.type==='darklord'){
-    x.fillStyle='#111';x.strokeStyle='#555';x.lineWidth=2;
-    x.beginPath();x.arc(0,-e.r*.22,e.r*.72,0,7);x.fill();x.stroke();
-    x.fillStyle='#0a0a0a';x.beginPath();x.moveTo(-e.r*.9,e.r*.95);x.lineTo(-e.r*.35,-e.r*.1);x.lineTo(e.r*.35,-e.r*.1);x.lineTo(e.r*.9,e.r*.95);x.closePath();x.fill();x.stroke();
-    x.fillStyle='#b8162f';x.fillRect(-e.r*.18,e.r*.2,e.r*.36,e.r*.42);
-  }else if(e.type==='fighter'){
-    x.fillStyle='#6b748a';x.strokeStyle='#1f2535';x.lineWidth=2;
-    x.beginPath();
-    x.moveTo(0,-e.r*.9);x.lineTo(e.r*.42,-e.r*.14);x.lineTo(e.r*1.1,-e.r*.02);x.lineTo(e.r*.26,e.r*.18);x.lineTo(e.r*.18,e.r*.95);
-    x.lineTo(0,e.r*.45);x.lineTo(-e.r*.18,e.r*.95);x.lineTo(-e.r*.26,e.r*.18);x.lineTo(-e.r*1.1,-e.r*.02);x.lineTo(-e.r*.42,-e.r*.14);
-    x.closePath();x.fill();x.stroke();
-    x.fillStyle='#7df9ff';x.beginPath();x.arc(0,e.r*.05,e.r*.12,0,7);x.fill();
-  }else if(e.type==='alien'){
-    x.fillStyle='#82d774';x.strokeStyle='#30592a';x.lineWidth=2;
-    x.beginPath();x.arc(0,0,e.r*.78,0,7);x.fill();x.stroke();
-    x.beginPath();x.moveTo(-e.r*.3,-e.r*.42);x.lineTo(-e.r*.55,-e.r*.95);x.lineTo(-e.r*.08,-e.r*.62);x.closePath();x.fill();x.stroke();
-    x.beginPath();x.moveTo(e.r*.3,-e.r*.42);x.lineTo(e.r*.55,-e.r*.95);x.lineTo(e.r*.08,-e.r*.62);x.closePath();x.fill();x.stroke();
-    x.fillStyle='#111';x.beginPath();x.ellipse(-e.r*.22,-e.r*.08,e.r*.12,e.r*.2,0,0,7);x.ellipse(e.r*.22,-e.r*.08,e.r*.12,e.r*.2,0,0,7);x.fill();
+  x.save();
+  x.translate(e.x,e.y);
+  x.rotate(e.a);
+  x.lineWidth=2.5;
+  x.lineJoin='round';
+
+  if(e.type==='vader'){
+    // Darth Vader-style black helmet and cape
+    x.fillStyle='#070707'; x.strokeStyle='#666';
+    x.beginPath(); x.moveTo(-e.r*.72,e.r*.05); x.lineTo(-e.r*.45,-e.r*.72);
+    x.quadraticCurveTo(0,-e.r*1.05,e.r*.45,-e.r*.72);
+    x.lineTo(e.r*.72,e.r*.05); x.lineTo(e.r*.48,e.r*.42);
+    x.lineTo(-e.r*.48,e.r*.42); x.closePath(); x.fill(); x.stroke();
+    x.fillStyle='#202020';
+    x.beginPath(); x.moveTo(-e.r*.42,-e.r*.32); x.lineTo(-e.r*.12,-e.r*.06);
+    x.lineTo(e.r*.12,-e.r*.06); x.lineTo(e.r*.42,-e.r*.32);
+    x.lineTo(e.r*.28,e.r*.12); x.lineTo(-e.r*.28,e.r*.12); x.closePath(); x.fill();
+    x.fillStyle='#b81f36'; x.fillRect(-e.r*.12,e.r*.1,e.r*.24,e.r*.18);
+    x.fillStyle='#050505';
+    x.beginPath(); x.moveTo(-e.r*.82,e.r*.38); x.lineTo(-e.r*.48,e.r*.1);
+    x.lineTo(e.r*.48,e.r*.1); x.lineTo(e.r*.82,e.r*.38); x.lineTo(e.r*.55,e.r*1.0);
+    x.lineTo(-e.r*.55,e.r*1.0); x.closePath(); x.fill(); x.stroke();
+
+  }else if(e.type==='stormtrooper'){
+    // White helmet
+    x.fillStyle='#f6f6f6'; x.strokeStyle='#20283a';
+    x.beginPath(); x.arc(0,-e.r*.18,e.r*.78,Math.PI,0);
+    x.lineTo(e.r*.66,e.r*.34); x.lineTo(e.r*.38,e.r*.72);
+    x.lineTo(-e.r*.38,e.r*.72); x.lineTo(-e.r*.66,e.r*.34); x.closePath(); x.fill(); x.stroke();
+    x.fillStyle='#121722';
+    x.beginPath(); x.moveTo(-e.r*.5,-e.r*.25); x.lineTo(-e.r*.12,-e.r*.1);
+    x.lineTo(-e.r*.18,e.r*.05); x.lineTo(-e.r*.54,-e.r*.05); x.closePath(); x.fill();
+    x.beginPath(); x.moveTo(e.r*.5,-e.r*.25); x.lineTo(e.r*.12,-e.r*.1);
+    x.lineTo(e.r*.18,e.r*.05); x.lineTo(e.r*.54,-e.r*.05); x.closePath(); x.fill();
+    x.fillRect(-e.r*.45,e.r*.3,e.r*.9,e.r*.16);
+    x.fillRect(-e.r*.12,e.r*.08,e.r*.24,e.r*.38);
+
+  }else if(e.type==='r2d2'){
+    // Blue and white astromech droid
+    x.fillStyle='#e9edf3'; x.strokeStyle='#394359';
+    x.beginPath(); x.arc(0,-e.r*.36,e.r*.62,Math.PI,0); x.lineTo(e.r*.62,-e.r*.2);
+    x.lineTo(-e.r*.62,-e.r*.2); x.closePath(); x.fill(); x.stroke();
+    x.fillStyle='#3267c8'; x.fillRect(-e.r*.48,-e.r*.47,e.r*.96,e.r*.13);
+    x.fillStyle='#101722'; x.beginPath(); x.arc(0,-e.r*.52,e.r*.1,0,7); x.fill();
+    x.fillStyle='#e9edf3'; x.beginPath(); x.roundRect(-e.r*.55,-e.r*.18,e.r*1.1,e.r*1.08,8); x.fill(); x.stroke();
+    x.fillStyle='#3267c8'; x.fillRect(-e.r*.38,e.r*.02,e.r*.76,e.r*.18);
+    x.fillRect(-e.r*.28,e.r*.32,e.r*.56,e.r*.18);
+    x.strokeStyle='#394359'; x.lineWidth=5;
+    x.beginPath(); x.moveTo(-e.r*.46,e.r*.76); x.lineTo(-e.r*.72,e.r*1.05);
+    x.moveTo(e.r*.46,e.r*.76); x.lineTo(e.r*.72,e.r*1.05); x.stroke();
+
+  }else if(e.type==='tiefighter'){
+    // TIE fighter silhouette
+    x.fillStyle='#232a38'; x.strokeStyle='#8e98ad';
+    x.fillRect(-e.r*1.05,-e.r*.9,e.r*.38,e.r*1.8);
+    x.fillRect(e.r*.67,-e.r*.9,e.r*.38,e.r*1.8);
+    x.strokeStyle='#6f7b93'; x.lineWidth=2;
+    for(let i=-2;i<=2;i++){
+      x.beginPath(); x.moveTo(-e.r*1.05,i*e.r*.36); x.lineTo(-e.r*.67,i*e.r*.22); x.stroke();
+      x.beginPath(); x.moveTo(e.r*1.05,i*e.r*.36); x.lineTo(e.r*.67,i*e.r*.22); x.stroke();
+    }
+    x.fillStyle='#4d586d'; x.strokeStyle='#aeb7c8'; x.lineWidth=2.5;
+    x.beginPath(); x.arc(0,0,e.r*.42,0,7); x.fill(); x.stroke();
+    x.fillStyle='#7df9ff'; x.beginPath(); x.arc(0,0,e.r*.12,0,7); x.fill();
+    x.strokeStyle='#4d586d'; x.lineWidth=5;
+    x.beginPath(); x.moveTo(-e.r*.67,0); x.lineTo(-e.r*.42,0);
+    x.moveTo(e.r*.42,0); x.lineTo(e.r*.67,0); x.stroke();
+
+  }else if(e.type==='deathstar'){
+    // Death Star
+    x.fillStyle='#7b8190'; x.strokeStyle='#c1c5cf';
+    x.beginPath(); x.arc(0,0,e.r,0,7); x.fill(); x.stroke();
+    x.strokeStyle='#515765'; x.lineWidth=2;
+    x.beginPath(); x.moveTo(-e.r,0); x.lineTo(e.r,0); x.stroke();
+    x.beginPath(); x.arc(0,0,e.r*.63,0,7); x.stroke();
+    x.fillStyle='#343945'; x.beginPath(); x.arc(e.r*.33,-e.r*.32,e.r*.23,0,7); x.fill();
+    x.fillStyle='#8cff9b'; x.beginPath(); x.arc(e.r*.33,-e.r*.32,e.r*.07,0,7); x.fill();
   }
+
   x.restore();
 }
 
