@@ -33,14 +33,14 @@ button{width:100%;background:#7df9ff;color:#061019}
   opacity:.65;
 }
 #crawlStage{
-  position:absolute;left:50%;bottom:-15vh;width:min(86vw,720px);
+  position:absolute;left:50%;bottom:-38vh;width:min(86vw,720px);
   transform:translateX(-50%) rotateX(22deg);
   transform-origin:50% 100%;
 }
 #crawl{
   text-align:justify;font-weight:800;letter-spacing:.02em;
-  font-size:clamp(20px,4.5vw,34px);line-height:1.55;
-  animation:crawlMove 20s linear forwards;
+  font-size:clamp(19px,4.2vw,32px);line-height:1.65;
+  animation:crawlMove 55s linear 5s forwards;
 }
 #crawl h2{
   text-align:center;font-size:clamp(24px,5vw,40px);
@@ -90,7 +90,7 @@ button{width:100%;background:#7df9ff;color:#061019}
       <p>But there was no time for cake just yet.</p>
       <p>A squadron of Shadow Drones had stolen the Starlight Crystal, an ancient power source capable of opening a hidden gateway between worlds. If the drones reached the final planet, they could awaken the Dark Beacon and plunge the galaxy into chaos.</p>
       <p>Only one newly qualified hero had the speed, skill and birthday-level bravery to stop them.</p>
-      <p>Ollie must travel across Aurelia, Volcara, Glacien and Noctis, destroy the incoming drones, recover the crystal fragments and reach the Dark Beacon before it activates.</p>
+      <p>Ollie must travel across Aurelia, Volcara, Glacien and Noctis, defeat troopers, droids, dark lords and rogue starfighters, recover the crystal fragments and reach the Dark Beacon before it activates.</p>
       <p>The mission is secret. The danger is real.</p>
       <p>And the galaxy is waiting for… Ollie Skywalker.</p>
     </div>
@@ -103,12 +103,12 @@ button{width:100%;background:#7df9ff;color:#061019}
     <div class="badge" id="worldLabel">Aurelia</div>
     <div class="badge">Score <span id="score">0</span> · ❤ <span id="lives">3</span></div>
   </div>
-  <div id="hint">Drag left/right to move · swipe up to jump · swipe toward drones to swing</div>
+  <div id="hint">Drag left/right to move · swipe up to jump · swipe toward enemies to swing</div>
 </div>
 
 <div id="menu" class="hide">
   <h1>Ollie Skywalker</h1>
-  <p>Pick a world, drag Ollie left and right across the screen, swipe up to jump, and swipe toward incoming drones to swing his energy sword.</p>
+  <p>Pick a world, drag Ollie left and right across the screen, swipe up to jump, and swipe toward incoming enemies to swing his energy sword.</p>
   <select id="world">
     <option value="aurelia">Aurelia</option>
     <option value="volcara">Volcara</option>
@@ -168,8 +168,20 @@ function bg(){
 }
 
 function spawnEnemy(){
-  const r=15+Math.random()*11;
-  enemies.push({x:25+Math.random()*(W-50),y:-30,r,vy:120+Math.random()*90+score*.45,vx:(Math.random()-.5)*35,spin:Math.random()*6-3,a:0});
+  const types=['trooper','droid','darklord','fighter','alien'];
+  const type=types[Math.floor(Math.random()*types.length)];
+  const rByType={trooper:20,droid:18,darklord:22,fighter:24,alien:17};
+  const r=(rByType[type]||18)+(Math.random()*4-2);
+  enemies.push({
+    x:25+Math.random()*(W-50),
+    y:-35,
+    r,
+    type,
+    vy:120+Math.random()*90+score*.45,
+    vx:(Math.random()-.5)*35,
+    spin:(type==='fighter'?Math.random()*3-1.5:Math.random()*6-3),
+    a:0
+  });
 }
 
 function segDist(ax,ay,bx,by,px,py){
@@ -226,9 +238,38 @@ function update(dt){
 
 function drawEnemy(e){
   x.save();x.translate(e.x,e.y);x.rotate(e.a);
-  x.fillStyle="#303747";x.strokeStyle="#b7c0d5";x.lineWidth=2;
-  x.beginPath();x.roundRect(-e.r,-e.r*.65,e.r*2,e.r*1.3,7);x.fill();x.stroke();
-  x.fillStyle="#ff5369";x.beginPath();x.arc(0,0,e.r*.25,0,7);x.fill();
+  if(e.type==='trooper'){
+    x.fillStyle='#f4f6fb';x.strokeStyle='#2a3145';x.lineWidth=2;
+    x.beginPath();x.arc(0,-e.r*.2,e.r*.72,0,7);x.fill();x.stroke();
+    x.fillStyle='#111826';x.fillRect(-e.r*.42,-e.r*.42,e.r*.84,e.r*.2);
+    x.fillStyle='#f4f6fb';x.beginPath();x.roundRect(-e.r*.72,e.r*.18,e.r*1.44,e.r*.9,6);x.fill();x.stroke();
+    x.fillStyle='#111826';x.fillRect(-e.r*.35,e.r*.42,e.r*.7,e.r*.16);
+  }else if(e.type==='droid'){
+    x.fillStyle='#d7b37b';x.strokeStyle='#6a4b22';x.lineWidth=2;
+    x.beginPath();x.roundRect(-e.r*.42,-e.r*.95,e.r*.84,e.r*.46,5);x.fill();x.stroke();
+    x.beginPath();x.roundRect(-e.r*.7,-e.r*.38,e.r*1.4,e.r*1.12,8);x.fill();x.stroke();
+    x.strokeStyle='#6a4b22';x.lineWidth=3;
+    x.beginPath();x.moveTo(-e.r*.3,e.r*.74);x.lineTo(-e.r*.5,e.r*1.25);x.moveTo(e.r*.3,e.r*.74);x.lineTo(e.r*.5,e.r*1.25);x.stroke();
+    x.fillStyle='#1fa7ff';x.beginPath();x.arc(-e.r*.18,-e.r*.73,e.r*.07,0,7);x.arc(e.r*.18,-e.r*.73,e.r*.07,0,7);x.fill();
+  }else if(e.type==='darklord'){
+    x.fillStyle='#111';x.strokeStyle='#555';x.lineWidth=2;
+    x.beginPath();x.arc(0,-e.r*.22,e.r*.72,0,7);x.fill();x.stroke();
+    x.fillStyle='#0a0a0a';x.beginPath();x.moveTo(-e.r*.9,e.r*.95);x.lineTo(-e.r*.35,-e.r*.1);x.lineTo(e.r*.35,-e.r*.1);x.lineTo(e.r*.9,e.r*.95);x.closePath();x.fill();x.stroke();
+    x.fillStyle='#b8162f';x.fillRect(-e.r*.18,e.r*.2,e.r*.36,e.r*.42);
+  }else if(e.type==='fighter'){
+    x.fillStyle='#6b748a';x.strokeStyle='#1f2535';x.lineWidth=2;
+    x.beginPath();
+    x.moveTo(0,-e.r*.9);x.lineTo(e.r*.42,-e.r*.14);x.lineTo(e.r*1.1,-e.r*.02);x.lineTo(e.r*.26,e.r*.18);x.lineTo(e.r*.18,e.r*.95);
+    x.lineTo(0,e.r*.45);x.lineTo(-e.r*.18,e.r*.95);x.lineTo(-e.r*.26,e.r*.18);x.lineTo(-e.r*1.1,-e.r*.02);x.lineTo(-e.r*.42,-e.r*.14);
+    x.closePath();x.fill();x.stroke();
+    x.fillStyle='#7df9ff';x.beginPath();x.arc(0,e.r*.05,e.r*.12,0,7);x.fill();
+  }else if(e.type==='alien'){
+    x.fillStyle='#82d774';x.strokeStyle='#30592a';x.lineWidth=2;
+    x.beginPath();x.arc(0,0,e.r*.78,0,7);x.fill();x.stroke();
+    x.beginPath();x.moveTo(-e.r*.3,-e.r*.42);x.lineTo(-e.r*.55,-e.r*.95);x.lineTo(-e.r*.08,-e.r*.62);x.closePath();x.fill();x.stroke();
+    x.beginPath();x.moveTo(e.r*.3,-e.r*.42);x.lineTo(e.r*.55,-e.r*.95);x.lineTo(e.r*.08,-e.r*.62);x.closePath();x.fill();x.stroke();
+    x.fillStyle='#111';x.beginPath();x.ellipse(-e.r*.22,-e.r*.08,e.r*.12,e.r*.2,0,0,7);x.ellipse(e.r*.22,-e.r*.08,e.r*.12,e.r*.2,0,0,7);x.fill();
+  }
   x.restore();
 }
 
