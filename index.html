@@ -17,22 +17,98 @@ button,select{font:inherit;font-weight:800;border:0;border-radius:14px;padding:1
 select{width:100%;margin:8px 0 10px;background:#151c35;color:#fff}
 button{width:100%;background:#7df9ff;color:#061019}
 #hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 12px);transform:translateX(-50%);font-size:12px;background:rgba(5,9,22,.62);padding:7px 10px;border-radius:999px}
+
+#intro{
+  position:fixed;inset:0;z-index:20;overflow:hidden;
+  background:radial-gradient(circle at 50% 65%,#101a44 0,#050814 42%,#000 100%);
+  color:#ffe46b;perspective:420px;
+}
+#introStars{
+  position:absolute;inset:0;
+  background-image:
+    radial-gradient(circle,#fff 0 1px,transparent 1.3px),
+    radial-gradient(circle,#fff 0 1px,transparent 1.3px);
+  background-size:74px 74px,111px 111px;
+  background-position:12px 18px,49px 63px;
+  opacity:.65;
+}
+#crawlStage{
+  position:absolute;left:50%;bottom:-15vh;width:min(86vw,720px);
+  transform:translateX(-50%) rotateX(22deg);
+  transform-origin:50% 100%;
+}
+#crawl{
+  text-align:justify;font-weight:800;letter-spacing:.02em;
+  font-size:clamp(20px,4.5vw,34px);line-height:1.55;
+  animation:crawlMove 20s linear forwards;
+}
+#crawl h2{
+  text-align:center;font-size:clamp(24px,5vw,40px);
+  margin:0 0 18px;letter-spacing:.08em;
+}
+#crawl .episode{
+  text-align:center;font-size:.7em;letter-spacing:.18em;margin-bottom:10px;
+}
+#introSkip{
+  position:absolute;right:14px;top:calc(env(safe-area-inset-top) + 12px);
+  z-index:22;width:auto;padding:9px 13px;border-radius:999px;
+  background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.18);
+}
+#introTitle{
+  position:absolute;left:50%;top:18%;transform:translateX(-50%);
+  width:min(88vw,600px);text-align:center;color:#78eaff;
+  text-shadow:0 0 24px rgba(125,249,255,.7);
+  animation:titleFade 4s ease forwards;
+  font-weight:900;letter-spacing:.08em;font-size:clamp(34px,10vw,76px);
+}
+@keyframes titleFade{
+  0%{opacity:0;transform:translate(-50%,20px) scale(.8)}
+  20%,65%{opacity:1;transform:translate(-50%,0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-20px) scale(1.08)}
+}
+@keyframes crawlMove{
+  0%{transform:translateY(0)}
+  100%{transform:translateY(-235vh)}
+}
+
 .hide{display:none}
 </style>
 </head>
 <body>
+
+<div id="intro">
+  <div id="introStars"></div>
+  <div id="introTitle">OLLIE SKYWALKER</div>
+  <button id="introSkip">Skip</button>
+  <div id="crawlStage">
+    <div id="crawl">
+      <div class="episode">THE BIRTHDAY MISSION</div>
+      <h2>OLLIE SKYWALKER</h2>
+      <p>On the morning of his birthday, a secret message arrived from the Galactic Council.</p>
+      <p>After years of courage, kindness and legendary lightsaber practice, Ollie had finally qualified for the title he had been destined to earn:</p>
+      <p style="text-align:center;font-size:1.2em">OLLIE SKYWALKER.</p>
+      <p>But there was no time for cake just yet.</p>
+      <p>A squadron of Shadow Drones had stolen the Starlight Crystal, an ancient power source capable of opening a hidden gateway between worlds. If the drones reached the final planet, they could awaken the Dark Beacon and plunge the galaxy into chaos.</p>
+      <p>Only one newly qualified hero had the speed, skill and birthday-level bravery to stop them.</p>
+      <p>Ollie must travel across Aurelia, Volcara, Glacien and Noctis, destroy the incoming drones, recover the crystal fragments and reach the Dark Beacon before it activates.</p>
+      <p>The mission is secret. The danger is real.</p>
+      <p>And the galaxy is waiting for… Ollie Skywalker.</p>
+    </div>
+  </div>
+</div>
+
 <canvas id="c"></canvas>
 <div id="ui">
   <div id="top">
     <div class="badge" id="worldLabel">Aurelia</div>
     <div class="badge">Score <span id="score">0</span> · ❤ <span id="lives">3</span></div>
   </div>
-  <div id="hint">Swipe to swing Ollie's energy sword</div>
+  <div id="hint">Drag left/right to move · swipe up to jump · swipe toward drones to swing</div>
 </div>
 
-<div id="menu">
+<div id="menu" class="hide">
   <h1>Ollie Skywalker</h1>
-  <p>Pick a world, then swipe your finger to swing Ollie's energy sword and hit the incoming drones.</p>
+  <p>Pick a world, drag Ollie left and right across the screen, swipe up to jump, and swipe toward incoming drones to swing his energy sword.</p>
   <select id="world">
     <option value="aurelia">Aurelia</option>
     <option value="volcara">Volcara</option>
@@ -49,9 +125,23 @@ heroImg.src="data:image/webp;base64,UklGRn5oAABXRUJQVlA4WAoAAAAQAAAADQEAZwEAQUxQ
 const c=document.getElementById("c"),x=c.getContext("2d");
 const scoreEl=document.getElementById("score"),livesEl=document.getElementById("lives");
 const menu=document.getElementById("menu"),worldSel=document.getElementById("world"),worldLabel=document.getElementById("worldLabel");
+
+const intro=document.getElementById("intro");
+const introSkip=document.getElementById("introSkip");
+const crawl=document.getElementById("crawl");
+let introDone=false;
+function finishIntro(){
+  if(introDone)return;
+  introDone=true;
+  intro.classList.add("hide");
+  menu.classList.remove("hide");
+}
+introSkip.addEventListener("click",finishIntro);
+crawl.addEventListener("animationend",finishIntro);
+
 let W,H,dpr,run=false,score=0,lives=3,last=0,spawn=0;
 let enemies=[],stars=[],sparks=[];
-let p={down:false,x:0,y:0},hero={x:0,y:0,a:-1.0,ta:-1.0};
+let p={down:false,x:0,y:0,startY:0,jumpTriggered:false},hero={x:0,targetX:0,y:0,a:-1.0,ta:-1.0,jumpY:0,jumpV:0,grounded:true};
 
 const worlds={
 aurelia:["#061126","#4b2c84","#e9a45e","#24143c","#7df9ff"],
@@ -63,7 +153,7 @@ noctis:["#02030a","#151832","#6674ff","#0c0e18","#ff70dc"]
 function resize(){
   dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;
   c.width=W*dpr;c.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0);
-  hero.x=W*.5;hero.y=H*.88;
+  hero.x=W*.5;hero.targetX=hero.x;hero.y=H*.88;
   stars=Array.from({length:70},()=>[Math.random()*W,Math.random()*H*.65,Math.random()*1.5+.3,Math.random()*.7+.25]);
 }
 addEventListener("resize",resize);resize();
@@ -90,7 +180,7 @@ function segDist(ax,ay,bx,by,px,py){
 
 function sword(){
   const L=Math.min(185,H*.23),a=hero.a;
-  const x1=hero.x+Math.cos(a)*22,y1=hero.y-95+Math.sin(a)*22;
+  const x1=hero.x+Math.cos(a)*22,y1=hero.y-95+hero.jumpY+Math.sin(a)*22;
   return [x1,y1,x1+Math.cos(a)*L,y1+Math.sin(a)*L];
 }
 
@@ -105,8 +195,24 @@ function hit(e){
   return false;
 }
 
+function jump(){
+  if(!hero.grounded)return;
+  hero.grounded=false;
+  hero.jumpV=-560;
+}
+
 function update(dt){
+  hero.x+=(hero.targetX-hero.x)*Math.min(1,dt*9);
   hero.a+=(hero.ta-hero.a)*Math.min(1,dt*14);
+  if(!hero.grounded){
+    hero.jumpV+=1450*dt;
+    hero.jumpY+=hero.jumpV*dt;
+    if(hero.jumpY>=0){
+      hero.jumpY=0;
+      hero.jumpV=0;
+      hero.grounded=true;
+    }
+  }
   spawn-=dt;if(spawn<=0){spawnEnemy();spawn=Math.max(.35,.95-score/800)+Math.random()*.25}
   enemies.forEach(e=>{e.x+=e.vx*dt;e.y+=e.vy*dt;e.a+=e.spin*dt});
   enemies=enemies.filter(e=>{
@@ -128,7 +234,7 @@ function drawEnemy(e){
 
 function drawHero(){
   const h=Math.min(300,H*.38),w=h*(270/360);
-  if(heroImg.complete)x.drawImage(heroImg,hero.x-w/2,H-h-8,w,h);
+  if(heroImg.complete)x.drawImage(heroImg,hero.x-w/2,H-h-8+hero.jumpY,w,h);
   const s=sword(),wld=worlds[worldSel.value];
   x.save();x.lineCap="round";x.shadowColor=wld[4];x.shadowBlur=20;x.strokeStyle=wld[4];x.lineWidth=10;x.beginPath();x.moveTo(s[0],s[1]);x.lineTo(s[2],s[3]);x.stroke();
   x.shadowBlur=6;x.strokeStyle="#fff";x.lineWidth=3;x.beginPath();x.moveTo(s[0],s[1]);x.lineTo(s[2],s[3]);x.stroke();x.restore();
@@ -146,7 +252,7 @@ function loop(t){
 }
 
 function start(){
-  score=0;lives=3;spawn=0;enemies=[];sparks=[];scoreEl.textContent=0;livesEl.textContent=3;
+  score=0;lives=3;spawn=0;enemies=[];sparks=[];hero.jumpY=0;hero.jumpV=0;hero.grounded=true;scoreEl.textContent=0;livesEl.textContent=3;
   worldLabel.textContent=worldSel.options[worldSel.selectedIndex].text;
   menu.classList.add("hide");run=true;last=performance.now();requestAnimationFrame(loop);
 }
@@ -159,12 +265,27 @@ function gameOver(){
 }
 
 document.getElementById("play").onclick=start;
+addEventListener("keydown",e=>{if(!run)return;if(e.key==="ArrowLeft")hero.targetX=Math.max(55,hero.targetX-55);if(e.key==="ArrowRight")hero.targetX=Math.min(W-55,hero.targetX+55);if(e.key===" "||e.key==="ArrowUp")jump()});
 worldSel.onchange=()=>{worldLabel.textContent=worldSel.options[worldSel.selectedIndex].text;draw()};
 
-c.addEventListener("pointerdown",e=>{p.down=true;p.x=e.clientX;p.y=e.clientY;c.setPointerCapture?.(e.pointerId);hero.ta=Math.atan2(e.clientY-(hero.y-95),e.clientX-hero.x)});
-c.addEventListener("pointermove",e=>{if(!p.down)return;p.x=e.clientX;p.y=e.clientY;hero.ta=Math.atan2(e.clientY-(hero.y-95),e.clientX-hero.x)});
-c.addEventListener("pointerup",()=>p.down=false);
-c.addEventListener("pointercancel",()=>p.down=false);
+c.addEventListener("pointerdown",e=>{
+  p.down=true;p.x=e.clientX;p.y=e.clientY;p.startY=e.clientY;p.jumpTriggered=false;
+  c.setPointerCapture?.(e.pointerId);
+  hero.targetX=Math.max(55,Math.min(W-55,e.clientX));
+  hero.ta=Math.atan2(e.clientY-(hero.y-95+hero.jumpY),e.clientX-hero.x);
+});
+c.addEventListener("pointermove",e=>{
+  if(!p.down)return;
+  p.x=e.clientX;p.y=e.clientY;
+  hero.targetX=Math.max(55,Math.min(W-55,e.clientX));
+  hero.ta=Math.atan2(e.clientY-(hero.y-95+hero.jumpY),e.clientX-hero.x);
+  if(!p.jumpTriggered && p.startY-e.clientY>55){
+    p.jumpTriggered=true;
+    jump();
+  }
+});
+c.addEventListener("pointerup",()=>{p.down=false;p.jumpTriggered=false});
+c.addEventListener("pointercancel",()=>{p.down=false;p.jumpTriggered=false});
 
 draw();
 </script>
