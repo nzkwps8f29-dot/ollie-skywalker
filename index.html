@@ -71,6 +71,42 @@ button{width:100%;background:#7df9ff;color:#061019}
   100%{transform:translateY(-235vh)}
 }
 
+#characterPicker{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  margin:10px 0 12px;
+}
+.charBtn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+  background:#151c35;
+  color:#fff;
+  border:2px solid transparent;
+  padding:11px 13px;
+  border-radius:14px;
+  font-weight:800;
+}
+.charBtn .icon{
+  width:36px;
+  text-align:center;
+  font-size:26px;
+}
+.charBtn.selected{
+  border-color:#7df9ff;
+  background:#203057;
+  box-shadow:0 0 18px rgba(125,249,255,.22);
+}
+.charBtn small{
+  display:block;
+  color:#aeb7cf;
+  font-size:11px;
+  margin-top:2px;
+  font-weight:600;
+}
 #musicBtn{
   position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom) + 48px);
   z-index:30;width:auto;padding:8px 11px;border-radius:999px;
@@ -116,11 +152,20 @@ button{width:100%;background:#7df9ff;color:#061019}
 <div id="menu" class="hide">
   <h1>Ollie Skywalker</h1>
   <p>Choose which Ollie you want to be, pick a world, then take on the galaxy.</p>
-  <select id="character">
-    <option value="skywalker">⚔️ Ollie Skywalker</option>
-    <option value="wotsit">🟠 Ollie the Giant Wotsit</option>
-    <option value="dinosaur">🦖 Ollie the Dinosaur</option>
-  </select>
+  <div id="characterPicker">
+    <button class="charBtn selected" type="button" data-character="skywalker">
+      <span class="icon">⚔️</span>
+      <span>Ollie Skywalker<small>Ollie as he is now</small></span>
+    </button>
+    <button class="charBtn" type="button" data-character="wotsit">
+      <span class="icon">🟠</span>
+      <span>Ollie the Giant Wotsit<small>Huge orange Wotsit with a glowing sword</small></span>
+    </button>
+    <button class="charBtn" type="button" data-character="dinosaur">
+      <span class="icon">🦖</span>
+      <span>Ollie the Dinosaur<small>Green dinosaur with a glowing sword</small></span>
+    </button>
+  </div>
   <select id="world">
     <option value="aurelia">Aurelia</option>
     <option value="volcara">Volcara</option>
@@ -205,7 +250,8 @@ heroImg.src="data:image/webp;base64,UklGRn5oAABXRUJQVlA4WAoAAAAQAAAADQEAZwEAQUxQ
 
 const c=document.getElementById("c"),x=c.getContext("2d");
 const scoreEl=document.getElementById("score"),livesEl=document.getElementById("lives");
-const menu=document.getElementById("menu"),worldSel=document.getElementById("world"),characterSel=document.getElementById("character"),worldLabel=document.getElementById("worldLabel");
+const menu=document.getElementById("menu"),worldSel=document.getElementById("world"),worldLabel=document.getElementById("worldLabel");
+let selectedCharacter="skywalker";
 
 const intro=document.getElementById("intro");
 const introSkip=document.getElementById("introSkip");
@@ -533,7 +579,7 @@ function drawDinosaur(){
 }
 
 function drawHero(){
-  const type=characterSel.value;
+  const type=selectedCharacter;
   if(type==="wotsit") drawWotsit();
   else if(type==="dinosaur") drawDinosaur();
   else drawSkywalker();
@@ -566,7 +612,7 @@ function loop(t){
 
 function start(){
   const names={skywalker:"Ollie Skywalker",wotsit:"Ollie the Giant Wotsit",dinosaur:"Ollie the Dinosaur"};
-  menu.querySelector("h1").textContent=names[characterSel.value]||"Ollie Skywalker";
+  menu.querySelector("h1").textContent=names[selectedCharacter]||"Ollie Skywalker";
   score=0;lives=3;spawn=0;enemyCycle=0;enemies=[];sparks=[];hero.jumpY=0;hero.jumpV=0;hero.grounded=true;scoreEl.textContent=0;livesEl.textContent=3;
   worldLabel.textContent=worldSel.options[worldSel.selectedIndex].text;
   menu.classList.add("hide");run=true;last=performance.now();requestAnimationFrame(loop);
@@ -582,11 +628,15 @@ function gameOver(){
 document.getElementById("play").onclick=()=>{startMusic();start();};
 addEventListener("keydown",e=>{if(!run)return;if(e.key==="ArrowLeft")hero.targetX=Math.max(55,hero.targetX-55);if(e.key==="ArrowRight")hero.targetX=Math.min(W-55,hero.targetX+55);if(e.key===" "||e.key==="ArrowUp")jump()});
 worldSel.onchange=()=>{worldLabel.textContent=worldSel.options[worldSel.selectedIndex].text;draw()};
-characterSel.onchange=()=>{
-  const names={skywalker:"Ollie Skywalker",wotsit:"Ollie the Giant Wotsit",dinosaur:"Ollie the Dinosaur"};
-  menu.querySelector("h1").textContent=names[characterSel.value];
-  draw();
-};
+document.querySelectorAll(".charBtn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    selectedCharacter=btn.dataset.character;
+    document.querySelectorAll(".charBtn").forEach(b=>b.classList.toggle("selected",b===btn));
+    const names={skywalker:"Ollie Skywalker",wotsit:"Ollie the Giant Wotsit",dinosaur:"Ollie the Dinosaur"};
+    menu.querySelector("h1").textContent=names[selectedCharacter];
+    draw();
+  });
+});
 
 c.addEventListener("pointerdown",e=>{
   p.down=true;p.x=e.clientX;p.y=e.clientY;p.startY=e.clientY;p.jumpTriggered=false;
